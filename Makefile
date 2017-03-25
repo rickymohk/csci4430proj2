@@ -1,8 +1,16 @@
-test:
-	gcc -o test test.c nat_table.c
+CC=gcc
+CFLAGS=-Wall -I.
+LDFLAGS=-lnfnetlink -lnetfilter_queue
 
-all:
-	gcc -o nftest nftest.c -lnfnetlink -lnetfilter_queue
+EXE=nat
+
+OBJ=nat.o nat_table.o
+
+${EXE}: ${OBJ}
+	${CC} ${CFLAGS} -o ${EXE} ${OBJ} ${LDFLAGS}
+
+test: test.o nat_table.o
+	${CC} ${CFLAGS} -o test test.o nat_table.o ${LDFLAGS}
 
 clean:
-	@rm -f nftest
+	rm -f ${EXE} ${OBJ}

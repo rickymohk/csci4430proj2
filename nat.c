@@ -117,6 +117,7 @@ int main(int argc, char **argv){
 
         fd = nfq_fd(h);
 
+
 	while ((len = recv(fd, buf, sizeof(buf), 0)) && len >= 0) {
 		nfq_handle_packet(h, buf, len);
 
