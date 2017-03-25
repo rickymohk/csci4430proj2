@@ -1,4 +1,4 @@
-typedef enum {} tcp_state_t;
+typedef enum {INIT} tcp_state_t;
 
 typedef struct nat_entry_s
 {
@@ -16,12 +16,16 @@ typedef struct nat_s
 	nat_entry *next_addr;				//point to first nat_entry *
 }nat_t;
 
-nat_t *nat_crate();
+nat_t *nat_create();
 
-nat_entry *nat_insert(nat_t *nat, unsigned short port, unsigned long addr);
+nat_entry *nat_insert(nat_t *nat, unsigned long addr, unsigned short port);
 
-nat_entry *nat_searchByLocal(nat_t *nat, unsigned short port, unsigned long addr);
+nat_entry *nat_searchByLocal(nat_t *nat, unsigned long addr, unsigned short port);
 
 nat_entry *nat_searchByOutPort(nat_t *nat, unsigned short port);
 
-void nat_expire(nat_t *nat, nat_entry *ne);
+void nat_delete(nat_t *nat, nat_entry *ne);
+
+void nat_dump(nat_t* nat);
+
+void nat_print(nat_entry *ne);
