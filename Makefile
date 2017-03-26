@@ -4,7 +4,7 @@ LDFLAGS=-lnfnetlink -lnetfilter_queue
 
 EXE=nat
 
-OBJ=nat.o nat_table.o
+OBJ=nat.o nat_table.o checksum.o
 
 ${EXE}: ${OBJ}
 	${CC} ${CFLAGS} -o ${EXE} ${OBJ} ${LDFLAGS}

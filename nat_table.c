@@ -56,7 +56,7 @@ nat_entry *nat_insert(nat_t *nat, unsigned long addr, unsigned short port)
 	}
 	else
 	{
-		perror("nat_insert(): invalid nat\n");
+		fprintf(stderr,"Error-nat_insert(): invalid nat\n");
 	}
 	return ne;
 
@@ -121,7 +121,7 @@ void nat_delete(nat_t *nat, nat_entry *ne)
 	}
 	else
 	{
-		perror("nat_expire(): invalid nat\n");
+		fprintf(stderr,"Error-nat_delete(): invalid nat\n");
 	}
 	nat->out_port_table[ne->out_port-10000] = NULL;
 	free(ne);
