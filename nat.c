@@ -9,6 +9,7 @@
 #include "nat_table.h"
 #include "checksum.h"
 
+
 struct cbarg
 {
 	unsigned long public_addr;
@@ -81,12 +82,35 @@ static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_da
 				{
 					//Matched entry found
 					trans_out(iph,tcph,public_addr,ne->out_port);
+					if( ne->state==SFIN1 && (tcph->th_flags & TH_ACK))
+					{
+						ne->state = CACK1;
+					}
+					if( ne->state==SFIN2 && (tcph->th_flags & TH_ACK))
+					{
+						ne->state = CACK2;
+					}
+
+					if(tcph->th_flags & TH_FIN)
+					{
+						//is FIN
+						if(ne->state == ACTIVE)
+						{
+							ne->state = CFIN1;
+						}
+						else if(ne->state == CACK1)
+						{
+							ne->state =CFIN2;
+						}
+					}
+
 				}
 				else if(tcph->th_flags & TH_SYN)
 				{
 					//is SYN
 					ne = nat_insert(nat,ntohl(iph->saddr),ntohs(tcph->source));
 					trans_out(iph,tcph,public_addr,ne->out_port);
+					nat_dump(nat,public_addr);
 				}
 				else
 				{
@@ -97,10 +121,38 @@ static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_da
 			{
 				//inbound packet
 				trans_in(iph,tcph,ne->local_addr,ne->local_port);
+				if( ne->state==CFIN1 && (tcph->th_flags & TH_ACK))
+				{
+					ne->state = SACK1;
+				}
+				if( ne->state==CFIN2 && (tcph->th_flags & TH_ACK))
+				{
+					ne->state = SACK2;
+				}
+
+				if(tcph->th_flags & TH_FIN)
+				{
+					//is FIN
+					if(ne->state == ACTIVE)
+					{
+						ne->state = SFIN1;
+					}
+					else if(ne->state == SACK1)
+					{
+						ne->state = SFIN2;
+					}
+				}
+
 			}
 			else
 			{
 				accept = 0;
+			}
+
+			if(ne && (ne->state==SACK2 || ne->state==CACK2 || (tcph->th_flags & TH_RST)))
+			{
+				nat_delete(nat,ne);
+				nat_dump(nat,public_addr);
 			}
 		}
 	}
@@ -116,6 +168,7 @@ static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_da
 	}
 
 }
+
 
 /*
  * Main program
@@ -133,7 +186,11 @@ int main(int argc, char **argv)
 	struct in_addr public_ip;
 	struct in_addr internal_ip;
 	int mask_int;
-
+	if(argc<4)
+	{
+		printf("usage: %s <public_ip> <internal ip> <subnet mask>\n",argv[0]);
+		return 0;
+	}
 	if(!inet_pton(AF_INET,(const char *)argv[1],&public_ip))
 	{
 		fprintf(stderr,"Invalid public address\n");

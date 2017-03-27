@@ -1,4 +1,4 @@
-typedef enum {INIT} tcp_state_t;
+typedef enum {ACTIVE,SFIN1,CACK1,CFIN2,SACK2,CFIN1,SACK1,SFIN2,CACK2} tcp_state_t;
 
 typedef struct nat_entry_s
 {
@@ -26,6 +26,6 @@ nat_entry *nat_searchByOutPort(nat_t *nat, unsigned short port);
 
 void nat_delete(nat_t *nat, nat_entry *ne);
 
-void nat_dump(nat_t* nat);
+void nat_dump(nat_t* nat, unsigned long public_addr);
 
-void nat_print(nat_entry *ne);
+void nat_print(nat_entry *ne, unsigned long public_addr);

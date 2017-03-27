@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 
+
 nat_t *nat_create()
 {
 	nat_t *n = (nat_t *)malloc(sizeof(nat_t));
@@ -26,6 +27,7 @@ nat_entry *nat_insert(nat_t *nat, unsigned long addr, unsigned short port)
 	ne->out_port = i+10000;
 	ne->next_addr = NULL;
 	ne->next_port = NULL;	
+	ne->state = ACTIVE;
 	if(nat && nat->next_addr && nat->next_addr->local_addr!=addr)
 	{
 		nat_entry *parent;
@@ -128,18 +130,20 @@ void nat_delete(nat_t *nat, nat_entry *ne)
 }
 
 
-void nat_dump(nat_t *nat)
+void nat_dump(nat_t *nat, unsigned long public_addr)
 {
 	if(nat && nat->next_addr)
 	{
-		printf("Internal IP\t\tInternal port\tExternal port\n");
+		printf("Orignal source address \t\tTranslated sources address\n");
 		nat_entry *ne;
 		for(ne=nat->next_addr;ne!=NULL;ne=ne->next_addr)
 		{
 			nat_entry *tmp;
 			for(tmp=ne;tmp!=NULL;tmp=tmp->next_port)
 			{
-				printf("%d.%d.%d.%d\t\t%d\t\t%d\n",(tmp->local_addr>>24)&0xff,(tmp->local_addr>>16)&0xff,(tmp->local_addr>>8)&0xff,tmp->local_addr&0xff,tmp->local_port,tmp->out_port);
+				printf("%lu.%lu.%lu.%lu:%u",(tmp->local_addr>>24)&0xff,(tmp->local_addr>>16)&0xff,(tmp->local_addr>>8)&0xff,tmp->local_addr&0xff,tmp->local_port);
+				printf("\t\t");
+				printf("%lu.%lu.%lu.%lu:%u\n",(public_addr>>24)&0xff,(public_addr>>16)&0xff,(public_addr>>8)&0xff,public_addr&0xff,tmp->out_port);
 			}
 
 		}
@@ -150,12 +154,12 @@ void nat_dump(nat_t *nat)
 	}
 }
 
-void nat_print(nat_entry *ne)
+void nat_print(nat_entry *ne, unsigned long public_addr)
 {	if(ne)
 	{
-
-		printf("Internal IP\t\tInternal port\tExternal port\n");
-		printf("%d.%d.%d.%d\t\t%d\t\t%d\n",(ne->local_addr>>24)&0xff,(ne->local_addr>>16)&0xff,(ne->local_addr>>8)&0xff,ne->local_addr&0xff,ne->local_port,ne->out_port);
-	
+		printf("Orignal source address \t\tTranslated sources address\n");
+		printf("%lu.%lu.%lu.%lu:%u",(ne->local_addr>>24)&0xff,(ne->local_addr>>16)&0xff,(ne->local_addr>>8)&0xff,ne->local_addr&0xff,ne->local_port);
+		printf("\t\t");
+		printf("%lu.%lu.%lu.%lu:%u\n",(public_addr>>24)&0xff,(public_addr>>16)&0xff,(public_addr>>8)&0xff,public_addr&0xff,ne->out_port);	
 	}
 }
