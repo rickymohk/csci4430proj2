@@ -71,12 +71,15 @@ static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_da
 	int len = nfq_get_payload(pkt, (char **)&pktData);
 	if (len > 0) 
 	{
+		if(DEBUG)printf("nfq payload len>0\n");
 		iph = (struct iphdr *)pktData;
 		if(iph->protocol == IPPROTO_TCP)
 		{
+			if(DEBUG)printf("is tcp packet\n");
 			//is tcp packet
 			tcph = (struct tcphdr *)(((char *)iph)+(iph->ihl<<2));
 			nat_entry *ne;
+			if(DEBUG)printf("saddr=%lu, local_mask=%lu, local_net=%lu\n",ntohl(iph->saddr),local_mask,local_net);
 			if((ntohl(iph->saddr) & local_mask)==local_net)
 			{
 				//outbound packet
@@ -213,7 +216,12 @@ int main(int argc, char **argv)
 	arg.local_mask = 0xffffffff << (32 - mask_int);
 	arg.local_net = internal_ip.s_addr & arg.local_mask;
 	arg.nat = nat_create();
-
+	if(DEBUG)
+	{
+		printf("public_addr=%lu, ",arg.public_addr);
+		printf("local_mask=%lu, ",arg.local_mask);
+		printf("local_net=%lu\n",arg.local_net);
+	}
 	// Open library handle
 	if (!(h = nfq_open())) {
 		fprintf(stderr, "Error: nfq_open()\n");
