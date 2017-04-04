@@ -66,7 +66,7 @@ static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_da
     }
 
 	unsigned char *pktData;
-	int len = nfq_get_payload(pkt, (unsigned char **)&pktData);
+	int len = nfq_get_payload(pkt, (char **)&pktData);
 	if (len > 0) 
 	{
 		iph = (struct iphdr *)pktData;
