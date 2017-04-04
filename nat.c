@@ -212,9 +212,9 @@ int main(int argc, char **argv)
 		fprintf(stderr,"Invalid subnet mask\n");
 		exit(-1);
 	}
-	arg.public_addr = public_ip.s_addr;
+	arg.public_addr = ntohl(public_ip.s_addr);
 	arg.local_mask = 0xffffffff << (32 - mask_int);
-	arg.local_net = internal_ip.s_addr & arg.local_mask;
+	arg.local_net = ntohl(internal_ip.s_addr) & arg.local_mask;
 	arg.nat = nat_create();
 	if(DEBUG)
 	{
