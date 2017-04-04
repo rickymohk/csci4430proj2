@@ -9,6 +9,7 @@
 #include "nat_table.h"
 #include "checksum.h"
 
+#define DEBUG 1
 
 struct cbarg
 {
@@ -43,6 +44,7 @@ void trans_in(struct iphdr *iph, struct tcphdr *tcph, unsigned long addr, unsign
  */
 static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_data *pkt, struct cbarg *arg) 
 {
+	if(DEBUG)printf("Packet captured\n");
     unsigned int id = 0;
 	struct nfqnl_msg_packet_hdr *header;
 	struct iphdr *iph;
