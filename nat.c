@@ -27,7 +27,7 @@ void trans_out(struct iphdr *iph, struct tcphdr *tcph, unsigned long addr, unsig
 	tcph->check = 0;
 	tcph->check = tcp_checksum((unsigned char *)iph);
 	iph->check = ip_checksum((unsigned char *)iph);
-
+	if(DEBUG)printf("outbound packet translated\n");
 }
 
 void trans_in(struct iphdr *iph, struct tcphdr *tcph, unsigned long addr, unsigned short port)
@@ -38,6 +38,7 @@ void trans_in(struct iphdr *iph, struct tcphdr *tcph, unsigned long addr, unsign
 	tcph->check = 0;
 	tcph->check = tcp_checksum((unsigned char *)iph);
 	iph->check = ip_checksum((unsigned char *)iph);
+	if(DEBUG)printf("inbound packet translated\n");
 }
 /*
  * Callback function installed to netfilter queue
@@ -71,17 +72,16 @@ static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_da
 	int len = nfq_get_payload(pkt, (char **)&pktData);
 	if (len > 0) 
 	{
-		if(DEBUG)printf("nfq payload len>0\n");
 		iph = (struct iphdr *)pktData;
 		if(iph->protocol == IPPROTO_TCP)
 		{
-			if(DEBUG)printf("is tcp packet\n");
 			//is tcp packet
 			tcph = (struct tcphdr *)(((char *)iph)+(iph->ihl<<2));
 			nat_entry *ne;
 			if(DEBUG)printf("saddr=%lu, local_mask=%lu, local_net=%lu\n",ntohl(iph->saddr),local_mask,local_net);
 			if((ntohl(iph->saddr) & local_mask)==local_net)
 			{
+				if(DEBUG)printf("outbound\n");
 				//outbound packet
 				if((ne = nat_searchByLocal(nat,ntohl(iph->saddr),ntohs(tcph->source))))
 				{
@@ -112,6 +112,7 @@ static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_da
 				}
 				else if(tcph->syn)
 				{
+					if(DEBUG)printf("outbound  syn\n");
 					//is SYN
 					ne = nat_insert(nat,ntohl(iph->saddr),ntohs(tcph->source));
 					trans_out(iph,tcph,public_addr,ne->out_port);
@@ -124,6 +125,7 @@ static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_da
 			}
 			else if((ne = nat_searchByOutPort(nat,ntohs(tcph->dest))))
 			{
+				if(DEBUG)printf("inbound match\n");
 				//inbound packet
 				trans_in(iph,tcph,ne->local_addr,ne->local_port);
 				if( ne->state==CFIN1 && (tcph->ack))
@@ -151,6 +153,7 @@ static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_da
 			}
 			else
 			{
+				if(DEBUG)printf("inbound dropped\n");
 				accept = 0;
 			}
 
