@@ -82,16 +82,16 @@ static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_da
 				{
 					//Matched entry found
 					trans_out(iph,tcph,public_addr,ne->out_port);
-					if( ne->state==SFIN1 && (tcph->th_flags & TH_ACK))
+					if( ne->state==SFIN1 && (tcph->ack))
 					{
 						ne->state = CACK1;
 					}
-					if( ne->state==SFIN2 && (tcph->th_flags & TH_ACK))
+					if( ne->state==SFIN2 && (tcph->ack))
 					{
 						ne->state = CACK2;
 					}
 
-					if(tcph->th_flags & TH_FIN)
+					if(tcph->fin)
 					{
 						//is FIN
 						if(ne->state == ACTIVE)
@@ -105,7 +105,7 @@ static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_da
 					}
 
 				}
-				else if(tcph->th_flags & TH_SYN)
+				else if(tcph->syn)
 				{
 					//is SYN
 					ne = nat_insert(nat,ntohl(iph->saddr),ntohs(tcph->source));
@@ -121,16 +121,16 @@ static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_da
 			{
 				//inbound packet
 				trans_in(iph,tcph,ne->local_addr,ne->local_port);
-				if( ne->state==CFIN1 && (tcph->th_flags & TH_ACK))
+				if( ne->state==CFIN1 && (tcph->ack))
 				{
 					ne->state = SACK1;
 				}
-				if( ne->state==CFIN2 && (tcph->th_flags & TH_ACK))
+				if( ne->state==CFIN2 && (tcph->ack))
 				{
 					ne->state = SACK2;
 				}
 
-				if(tcph->th_flags & TH_FIN)
+				if(tcph->fin)
 				{
 					//is FIN
 					if(ne->state == ACTIVE)
@@ -149,7 +149,7 @@ static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_da
 				accept = 0;
 			}
 
-			if(ne && (ne->state==SACK2 || ne->state==CACK2 || (tcph->th_flags & TH_RST)))
+			if(ne && (ne->state==SACK2 || ne->state==CACK2 || (tcph.rst)))
 			{
 				nat_delete(nat,ne);
 				nat_dump(nat,public_addr);
