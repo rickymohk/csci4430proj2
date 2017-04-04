@@ -149,7 +149,7 @@ static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_da
 				accept = 0;
 			}
 
-			if(ne && (ne->state==SACK2 || ne->state==CACK2 || (tcph.rst)))
+			if(ne && (ne->state==SACK2 || ne->state==CACK2 || (tcph->rst)))
 			{
 				nat_delete(nat,ne);
 				nat_dump(nat,public_addr);
