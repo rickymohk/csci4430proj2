@@ -23,7 +23,7 @@ void trans_out(struct iphdr *iph, struct tcphdr *tcph, unsigned long addr, unsig
 {
 	iph->saddr = htonl(addr);
 	tcph->source = htons(port);
-	if(DEBUG)printf("saddr=%lu, sport=%hu\n",ntohl(iph->saddr),ntohs(tcph->source));
+	if(DEBUG)printf("saddr=%u, sport=%hu\n",ntohl(iph->saddr),ntohs(tcph->source));
 	iph->check = 0;
 	tcph->check = 0;
 	tcph->check = tcp_checksum((unsigned char *)iph);
@@ -79,7 +79,7 @@ static int Callback(struct nfq_q_handle *qh, struct nfgenmsg *msg, struct nfq_da
 			//is tcp packet
 			tcph = (struct tcphdr *)(((char *)iph)+(iph->ihl<<2));
 			nat_entry *ne;
-			if(DEBUG)printf("saddr=%lu, local_mask=%lu, local_net=%lu\n",ntohl(iph->saddr),local_mask,local_net);
+			if(DEBUG)printf("saddr=%u, local_mask=%lu, local_net=%lu\n",ntohl(iph->saddr),local_mask,local_net);
 			if((ntohl(iph->saddr) & local_mask)==local_net)
 			{
 				if(DEBUG)printf("outbound\n");
