@@ -158,7 +158,7 @@ void nat_print(nat_entry *ne, unsigned long public_addr)
 		sprintf(cell,"%s%u.%s%u.%s%u.%s%u:%s%hu",space[nspace3(addr[0])],addr[0],space[nspace3(addr[1])],addr[1],space[nspace3(addr[2])],addr[2],space[nspace3(addr[3])],addr[3],space[nspace5(port)],port);
 		printf("%26s\t",cell);
 		port = ne->out_port;
-		sprintf(cell,"%s%u.%s%u.%s%u.%s%u:%s%hu",space[nspace3(addr2[0])],addr2[0],space[nspace3(addr2[1])],addr2[1],space[nspace3(addr[2])],addr[2],space[nspace3(addr[3])],addr[3],space[nspace5(port)],port);
+		sprintf(cell,"%s%u.%s%u.%s%u.%s%u:%s%hu",space[nspace3(addr2[0])],addr2[0],space[nspace3(addr2[1])],addr2[1],space[nspace3(addr2[2])],addr2[2],space[nspace3(addr2[3])],addr2[3],space[nspace5(port)],port);
 		printf("%26s\n",cell);	}
 }
 
@@ -181,6 +181,6 @@ void nat_dump(nat_t *nat, unsigned long public_addr)
 	}
 	else
 	{
-		printf("NAT table is empty.\n");
+		printf("\tNAT table is empty.\n");
 	}
 }
