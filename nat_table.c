@@ -129,37 +129,58 @@ void nat_delete(nat_t *nat, nat_entry *ne)
 	free(ne);
 }
 
+int nspace3(unsigned char d)
+{
+	if(d<10) return 2;
+	if(d<100)return 1;
+	return 0;
+}
+
+int nspace5(unsigned short d)
+{
+	if(d<10)return 4;
+	if(d<100)return 3;
+	if(d<1000)return 2;
+	if(d<10000)return 1;
+	return 0;
+}
+
+
+void nat_print(nat_entry *ne, unsigned long public_addr)
+{	if(ne)
+	{
+		const char *space[] = {""," ","  ","   ","    "};
+		unsigned char addr[] = {(ne->local_addr>>24)&0xff,(ne->local_addr>>16)&0xff,(ne->local_addr>>8)&0xff,ne->local_addr&0xff};
+		unsigned short port = ne->local_port;
+		unsigned char addr2[] = {(public_addr>>24)&0xff,(public_addr>>16)&0xff,(public_addr>>8)&0xff,public_addr&0xff};
+		char cell[30];
+
+		sprintf(cell,"%s%u.%s%u.%s%u.%s%u:%s%hu",space[nspace3(addr[0])],addr[0],space[nspace3(addr[1])],addr[1],space[nspace3(addr[2])],addr[2],space[nspace3(addr[3])],addr[3],space[nspace5(port)],port);
+		printf("%26s\t",cell);
+		port = ne->out_port;
+		sprintf(cell,"%s%u.%s%u.%s%u.%s%u:%s%hu",space[nspace3(addr2[0])],addr2[0],space[nspace3(addr2[1])],addr2[1],space[nspace3(addr[2])],addr[2],space[nspace3(addr[3])],addr[3],space[nspace5(port)],port);
+		printf("%26s\n",cell);	}
+}
 
 void nat_dump(nat_t *nat, unsigned long public_addr)
 {
+	printf("\n NAT Table:\n");
 	if(nat && nat->next_addr)
 	{
-		printf("Orignal source address \t\tTranslated sources address\n");
+		printf("%26s\t%26s\n","Orignal source address","Translated sources address");
 		nat_entry *ne;
 		for(ne=nat->next_addr;ne!=NULL;ne=ne->next_addr)
 		{
 			nat_entry *tmp;
 			for(tmp=ne;tmp!=NULL;tmp=tmp->next_port)
 			{
-				printf("%lu.%lu.%lu.%lu:%u",(tmp->local_addr>>24)&0xff,(tmp->local_addr>>16)&0xff,(tmp->local_addr>>8)&0xff,tmp->local_addr&0xff,tmp->local_port);
-				printf("\t\t");
-				printf("%lu.%lu.%lu.%lu:%u\n",(public_addr>>24)&0xff,(public_addr>>16)&0xff,(public_addr>>8)&0xff,public_addr&0xff,tmp->out_port);
+				nat_print(tmp,public_addr);
 			}
 
 		}
 	}
 	else
 	{
-		printf("NAT is empty.\n");
-	}
-}
-
-void nat_print(nat_entry *ne, unsigned long public_addr)
-{	if(ne)
-	{
-		printf("Orignal source address \t\tTranslated sources address\n");
-		printf("%lu.%lu.%lu.%lu:%u",(ne->local_addr>>24)&0xff,(ne->local_addr>>16)&0xff,(ne->local_addr>>8)&0xff,ne->local_addr&0xff,ne->local_port);
-		printf("\t\t");
-		printf("%lu.%lu.%lu.%lu:%u\n",(public_addr>>24)&0xff,(public_addr>>16)&0xff,(public_addr>>8)&0xff,public_addr&0xff,ne->out_port);	
+		printf("NAT table is empty.\n");
 	}
 }
